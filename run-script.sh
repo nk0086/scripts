@@ -11,6 +11,7 @@ CURRENT_SCRIPT=$(basename "$0")
 # スクリプト一覧を取得し、メタデータと共にRofiで選択させる
 selected_script=$(find "$SCRIPT_DIR" -type f -executable | 
     grep -v "$CURRENT_SCRIPT" | 
+    grep -E '\.sh$' |
     while read -r script; do
         name=$(grep "^# NAME:" "$script" | cut -d':' -f2- | xargs)
         [ -z "$name" ] && name=$(basename "$script")
