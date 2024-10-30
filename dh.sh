@@ -28,9 +28,17 @@ select_container() {
 
 # Action selection function
 select_action() {
-    action=$(echo -e "Connect to container\nStop container\nCancel" | fzf --height 40% --reverse --header="Select an action")
+    action=$(echo -e "Connect to container\nStop container\nStart docker-compose\nCancel" | fzf --height 40% --reverse --header="Select an action")
     
     case "$action" in
+        "Start docker-compose")
+            if [ -f "docker-compose.yml" ]; then
+                sudo docker-compose up -d
+                echo "Containers started"
+            else
+                echo "docker-compose.yml not found in current directory"
+            fi
+            ;;
         "Connect to container")
             sudo docker exec -it $container_id /bin/bash || sudo docker exec -it $container_id /bin/sh
             ;;
