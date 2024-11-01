@@ -55,23 +55,36 @@ select_action() {
 # Main process
 echo -e "${GREEN}Docker Helper${NC}"
 
-# Check for running containers
-if [ -z "$(sudo docker ps -q)" ]; then
-    echo "No running containers found"
-    
-    # Check if docker-compose.yml exists
-    if [ -f "docker-compose.yml" ]; then
-        echo -e "\n${YELLOW}Found docker-compose.yml in current directory${NC}"
-        read -p "Do you want to run 'docker-compose up -d'? (y/n): " answer
-        if [[ $answer =~ ^[Yy]$ ]]; then
+# Initial action selection
+initial_action=$(echo -e "Manage running container\nStart docker-compose\nStop all containers\nExit" | fzf --height 40% --reverse --header="Select an action")
+
+case "$initial_action" in
+    "Manage running container")
+        # Check for running containers
+        if [ -z "$(sudo docker ps -q)" ]; then
+            echo "No running containers found"
+            exit 1
+        fi
+        select_container
+        select_action
+        ;;
+    "Start docker-compose")
+        if [ -f "docker-compose.yml" ]; then
             sudo docker-compose up -d
             echo "Containers started"
-            exit 0
+        else
+            echo "docker-compose.yml not found in current directory"
         fi
-    fi
-    
-    exit 1
-fi
-
-select_container
-select_action 
+        ;;
+    "Stop all containers")
+        if [ -n "$(sudo docker ps -q)" ]; then
+            sudo docker stop $(sudo docker ps -q)
+            echo "All containers stopped"
+        else
+            echo "No running containers found"
+        fi
+        ;;
+    "Exit")
+        exit 0
+        ;;
+esac
